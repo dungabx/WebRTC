@@ -1,0 +1,15 @@
+name: webrtc_video_call
+description: >
+  Ứng dụng gọi video P2P sử dụng WebRTC - Bài tiểu luận giữa kỳ. 
+
+version: 1.0.0
+
+environment:
+  sdk: '>=2.19.0 <3.0.0'
+
+dependencies:
+  http: ^0.13.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
