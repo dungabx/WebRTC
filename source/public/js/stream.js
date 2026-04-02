@@ -82,20 +82,35 @@ function createPeerConnection(userId) {
     }
   };
 
+  // Bổ sung hàm xử lý khôi phục kết nối (ICE Restart)
+  async function handleIceRestart() {
+    if (!peerConnection) return;
+    try {
+      peerConnection.restartIce();
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('offer', { offer, to: remoteUserId });
+    } catch (err) {
+      console.error('Lỗi restart ICE:', err);
+    }
+  }
+
   // Theo dõi trạng thái kết nối
   peerConnection.onconnectionstatechange = () => {
     const state = peerConnection.connectionState;
     if (state === 'connected') updateStatus('connected', 'Đã kết nối');
-    else if (state === 'disconnected') updateStatus('warning', 'Mất kết nối...');
+    else if (state === 'disconnected') updateStatus('warning', 'Đang mất mạng...');
     else if (state === 'failed') {
-      updateStatus('failed', 'Kết nối thất bại');
-      peerConnection.restartIce();
+      updateStatus('failed', 'Mạng gián đoạn');
+      handleIceRestart();
     }
   };
 
   // Tự động khôi phục khi ICE thất bại
   peerConnection.oniceconnectionstatechange = () => {
-    if (peerConnection.iceConnectionState === 'failed') peerConnection.restartIce();
+    if (peerConnection.iceConnectionState === 'failed') {
+      handleIceRestart();
+    }
   };
 
   return peerConnection;
@@ -139,12 +154,17 @@ socket.on('user-joined', async (userId) => {
 
 // Nhận offer → tạo answer
 socket.on('offer', async (data) => {
-  createPeerConnection(data.from);
-  // Lắng nghe DataChannel từ người gửi offer
-  peerConnection.ondatachannel = (event) => {
-    dataChannel = event.channel;
-    setupDataChannel(dataChannel);
-  };
+  // Bổ sung điều kiện chỉ lấy mới nếu chưa tồn tại kết nối
+  // Điều này giúp giữ nguyên Stream và Track hiện tại nếu đây là một lượt Negotiate lại (ICE Restart)
+  if (!peerConnection) {
+    createPeerConnection(data.from);
+    // Lắng nghe DataChannel từ người gửi offer
+    peerConnection.ondatachannel = (event) => {
+      dataChannel = event.channel;
+      setupDataChannel(dataChannel);
+    };
+  }
+  
   try {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
     const answer = await peerConnection.createAnswer();
