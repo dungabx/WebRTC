@@ -14,32 +14,12 @@ const usrAvatar = document.getElementById('usr-avatar') ? document.getElementByI
 const myProfile = { id: webClientId, accountId: usrId, nickname: usrNickname, avatar: usrAvatar };
 
 // === Cấu hình STUN/TURN servers ===
-const iceConfig = {
+// === Cấu hình STUN/TURN servers ===
+// Cấu hình ban đầu chứa STUN dự phòng, cấu hình TURN sẽ được tải động qua API
+let iceConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun.relay.metered.ca:80' },
-    { urls: 'stun:stun.cloudflare.com:3478' },
-    {
-      urls: 'turn:global.relay.metered.ca:80',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    },
-    {
-      urls: 'turn:global.relay.metered.ca:80?transport=tcp',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    },
-    {
-      urls: 'turn:global.relay.metered.ca:443',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    },
-    {
-      urls: 'turns:global.relay.metered.ca:443?transport=tcp',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    }
+    { urls: 'stun:stun1.l.google.com:19302' }
   ]
 };
 
@@ -247,7 +227,19 @@ async function stopCallTimer() {
 // === Khởi tạo ứng dụng ===
 async function init() {
   try {
-    // Yêu cầu quyền truy cập camera và mic
+    // 1. Fetch cấu hình ICE thông qua API của dự án Metered
+    try {
+        const turnRes = await fetch("https://webrtc_dungabx.metered.live/api/v1/turn/credentials?apiKey=aff29f962ea935112c80691eb3d868669fec");
+        const turnServers = await turnRes.json();
+        if(turnServers && turnServers.length > 0) {
+            iceConfig.iceServers = [...iceConfig.iceServers, ...turnServers];
+            console.log('[API] Đã nén ICE Servers của Metered thành công!');
+        }
+    } catch(err) {
+        console.error('[API] Lỗi lấy cấu hình TURN:', err);
+    }
+
+    // 2. Yêu cầu quyền truy cập camera và mic
     localStream = await navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }

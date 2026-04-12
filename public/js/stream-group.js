@@ -14,32 +14,10 @@ const usrNickname = document.getElementById('usr-nickname').value;
 const usrAvatar = document.getElementById('usr-avatar').value;
 const myProfile = { id: webClientId, accountId: usrId, nickname: usrNickname, avatar: usrAvatar };
 
-const iceConfig = {
+let iceConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun.relay.metered.ca:80' },
-    { urls: 'stun:stun.cloudflare.com:3478' },
-    {
-      urls: 'turn:global.relay.metered.ca:80',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    },
-    {
-      urls: 'turn:global.relay.metered.ca:80?transport=tcp',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    },
-    {
-      urls: 'turn:global.relay.metered.ca:443',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    },
-    {
-      urls: 'turns:global.relay.metered.ca:443?transport=tcp',
-      username: '76f92abcfc9edd78e00f9379',
-      credential: 'fLDc1aRRgRYw/fVu'
-    }
+    { urls: 'stun:stun1.l.google.com:19302' }
   ]
 };
 
@@ -62,6 +40,17 @@ const statusText = document.querySelector('.status-text');
 // === Khởi chạy ứng dụng ===
 async function init() {
   try {
+    try {
+        const turnRes = await fetch("https://webrtc_dungabx.metered.live/api/v1/turn/credentials?apiKey=aff29f962ea935112c80691eb3d868669fec");
+        const turnServers = await turnRes.json();
+        if(turnServers && turnServers.length > 0) {
+            iceConfig.iceServers = [...iceConfig.iceServers, ...turnServers];
+            console.log('[API] Đã nén ICE Servers Nhóm của Metered thành công!');
+        }
+    } catch(err) {
+        console.error('[API] Lỗi lấy cấu hình TURN:', err);
+    }
+
     localStream = await navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
       audio: { echoCancellation: true, noiseSuppression: true }
