@@ -2,9 +2,10 @@
 // Xử lý kết nối P2P, signaling, media controls, screen sharing, DataChannel chat
 
 // Lấy thông tin tài khoản đang thao tác
+const usrId = document.getElementById('usr-id') ? document.getElementById('usr-id').value : 'guest';
 const usrNickname = document.getElementById('usr-nickname') ? document.getElementById('usr-nickname').value : 'Người dùng hệ thống';
 const usrAvatar = document.getElementById('usr-avatar') ? document.getElementById('usr-avatar').value : '';
-const myProfile = { nickname: usrNickname, avatar: usrAvatar };
+const myProfile = { id: usrId, nickname: usrNickname, avatar: usrAvatar };
 
 // === Cấu hình STUN/TURN servers ===
 const iceConfig = {
