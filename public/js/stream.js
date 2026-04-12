@@ -36,6 +36,22 @@ const iceConfig = {
 // === Kết nối Socket.io ===
 const socket = io();
 
+// Xử lý mất mạng/tái kết nối (Network Hopping)
+socket.on('connect', () => {
+    console.log(`[Socket] Kết nối thành công với ID: ${socket.id}`);
+    // Nếu thiết bị đã từng vào phòng (tức là đã load Camera và WebRTC trước đó)
+    // Thì cần nạp lại thông tin phòng để người khác nhận tín hiệu
+    if (localStream && typeof roomId !== 'undefined') {
+        iceCandidateQueue = []; // Xoá sạch rác IP phiên bản cũ mạng cũ
+        socket.emit('join-room', roomId, myProfile);
+    }
+});
+
+socket.on('disconnect', () => {
+    console.warn('[Socket] Mất kết nối tới máy chủ (Có thể do chuyển đổi Wifi/4G)');
+    updateStatus('warning', 'Đang kết nối lại máy chủ...');
+});
+
 // === Biến toàn cục ===
 let localStream = null;       // Luồng media của bản thân
 let peerConnection = null;    // Kết nối P2P
@@ -391,8 +407,15 @@ function createFloatingEmoji(emojiText) {
 // Có người mới vào phòng → tạo offer
 socket.on('user-joined', async (data) => {
   const { userId, profile } = data;
-  showToast(`${profile ? profile.nickname : 'Ai đó'} đã tham gia phòng`, 'info');
+  showToast(`${profile ? profile.nickname : 'Ai đó'} đã tham gia lại phòng`, 'info');
   updateRemoteProfileUI(profile);
+
+  // Quan trọng: Nếu phát hiện có kết nối kẹt từ mạng đợt trước, đập đi xây lại
+  if (peerConnection) {
+      console.warn("Huỷ PeerConnection cũ để thiết lập trạng thái P2P mới...");
+      peerConnection.close();
+      peerConnection = null;
+  }
 
   createPeerConnection(userId);
   createDataChannel();
@@ -423,9 +446,11 @@ socket.on('offer', async (data) => {
     await peerConnection.setLocalDescription(answer);
     socket.emit('answer', { answer, to: data.from });
     
-    // Nạp lại các gói ICE Candidate bị lag/tới sớm
+    // Nạp lại các gói ICE Candidate bị lag/tới sớm (Bọc Try catch an toàn)
     while (iceCandidateQueue.length) {
-       await peerConnection.addIceCandidate(iceCandidateQueue.shift());
+       let cand = iceCandidateQueue.shift();
+       try { await peerConnection.addIceCandidate(cand); } 
+       catch(e) { console.warn("Lỗi nạp ICE phụ kiện", e); }
     }
   } catch (err) {
     console.error('Lỗi xử lý offer:', err);
@@ -437,9 +462,11 @@ socket.on('answer', async (data) => {
   try {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
     
-    // Nạp lại các gói ICE Candidate bị lag/tới sớm
+    // Nạp lại các gói ICE Candidate (Bọc Try catch an toàn)
     while (iceCandidateQueue.length) {
-       await peerConnection.addIceCandidate(iceCandidateQueue.shift());
+       let cand = iceCandidateQueue.shift();
+       try { await peerConnection.addIceCandidate(cand); } 
+       catch(e) { console.warn("Lỗi nạp ICE phụ kiện", e); }
     }
   } catch (err) {
     console.error('Lỗi xử lý answer:', err);
