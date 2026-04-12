@@ -95,8 +95,7 @@ Client A ←→ Signaling Server (Socket.io) ←→ Client B
 ## Deploy
 
 Ứng dụng đã được deploy và khởi chạy thành công trên nền tảng đám mây **Render**:
-- **Link (Gọi video thực tế)**: [https://webrtc-0onu.onrender.com/](https://webrtc-0onu.onrender.com/)
-- **Link (Demo gg drive)**: [https://drive.google.com/file/d/1j2e0PzFYkCUC-N4WFD5bO6u1L7zCS96R/view?usp=sharing](https://drive.google.com/file/d/1j2e0PzFYkCUC-N4WFD5bO6u1L7zCS96R/view?usp=sharing)
+- **Link Live Demo (Gọi video thực tế)**: [https://webrtc-0onu.onrender.com/](https://webrtc-0onu.onrender.com/)
 
 ## Thành viên nhóm
 

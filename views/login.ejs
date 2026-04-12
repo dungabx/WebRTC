@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Dũng WebRTC</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-container {
+            max-width: 400px; margin: 100px auto; padding: 30px;
+            background: var(--surface); border-radius: var(--radius);
+            box-shadow: var(--shadow); text-align: center;
+        }
+        .auth-container input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
+            border: 1px solid #444; background: #222; color: #fff;
+        }
+        .auth-container button { width: 100%; margin-top: 10px; }
+        .error-text { color: #ff4757; margin-bottom: 15px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2><i class="fas fa-video text-primary"></i> Đăng Nhập</h2>
+        <p class="text-secondary" style="margin-bottom:20px;">Vui lòng đăng nhập để bắt đầu cuộc gọi</p>
+        
+        <% if (error) { %>
+            <div class="error-text"><%= error %></div>
+        <% } %>
+        
+        <form action="/login" method="POST">
+            <input type="text" name="username" placeholder="Tên đăng nhập" required>
+            <input type="password" name="password" placeholder="Mật khẩu" required>
+            <button class="btn btn-primary" type="submit">Đăng nhập</button>
+        </form>
+        <p style="margin-top:20px; font-size: 0.9em;">
+            Chưa có tài khoản? <a href="/register" style="color:var(--primary)">Đăng ký ngay</a>
+        </p>
+    </div>
+</body>
+</html>

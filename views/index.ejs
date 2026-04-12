@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ứng dụng gọi video P2P miễn phí sử dụng WebRTC">
+  <title>WebRTC Video Call - Gọi Video P2P</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Hiệu ứng nền động -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="landing">
+    <div class="card fade-in">
+      <!-- Logo -->
+      <div class="card-header">
+        <div class="logo">
+          <div class="logo-icon"><i class="fas fa-video"></i></div>
+          <h1>WebRTC <span class="gradient-text">Video Call</span></h1>
+        </div>
+        <p class="subtitle">Xin chào, <label style="font-weight:bold; color:var(--primary)"><%= user.nickname %></label>!</p>
+        <div style="margin-top:10px; display: flex; align-items: center; justify-content: center;">
+           <img src="<%= user.avatar %>" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--primary); object-fit: cover;">
+           <div style="margin-left: 15px;">
+              <a href="/profile" class="btn btn-secondary" style="padding: 5px 15px; font-size:12px; border-radius: 20px;"><i class="fas fa-user-edit"></i> Hồ sơ</a>
+              <a href="/logout" class="btn btn-secondary" style="padding: 5px 15px; font-size:12px; margin-left:5px; border-radius: 20px;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Thông báo lỗi -->
+      <div id="error-msg" class="alert alert-error" style="display:none;">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>Phòng đã đầy. Vui lòng tạo phòng mới.</span>
+      </div>
+
+      <!-- Tạo phòng -->
+      <div class="card-section">
+        <h2 class="section-title">Tạo phòng mới</h2>
+        <p class="section-desc">Bắt đầu cuộc gọi và chia sẻ mã phòng cho đối phương</p>
+        <a href="/create" class="btn btn-primary btn-full" id="create-room-btn">
+          <i class="fas fa-plus"></i> Tạo Phòng
+        </a>
+      </div>
+
+      <div class="divider"><span>hoặc</span></div>
+
+      <!-- Tham gia phòng -->
+      <div class="card-section">
+        <h2 class="section-title">Tham gia phòng</h2>
+        <p class="section-desc">Nhập mã phòng để tham gia cuộc gọi</p>
+        <form id="join-form" class="join-form">
+          <div class="input-group">
+            <input type="text" id="room-input" placeholder="Nhập mã phòng..." required autocomplete="off">
+            <button type="submit" class="btn btn-secondary">
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tính năng nổi bật -->
+      <div class="features">
+        <div class="feature"><i class="fas fa-lock"></i><span>Mã hóa E2E</span></div>
+        <div class="feature"><i class="fas fa-bolt"></i><span>Độ trễ thấp</span></div>
+        <div class="feature"><i class="fas fa-desktop"></i><span>Chia sẻ màn hình</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Hiển thị lỗi nếu phòng đầy
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'full') {
+      const el = document.getElementById('error-msg');
+      el.style.display = 'flex';
+      setTimeout(() => el.style.display = 'none', 5000);
+    }
+    // Xử lý form tham gia phòng
+    document.getElementById('join-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const roomId = document.getElementById('room-input').value.trim();
+      if (roomId) window.location.href = '/room/' + roomId;
+    });
+  </script>
+</body>
+</html>
