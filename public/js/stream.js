@@ -255,8 +255,11 @@ function createPeerConnection(userId) {
     currentRemoteStream = event.streams[0];
     if (isSwapped) {
        localVideo.srcObject = currentRemoteStream;
+       // Ép play() trên Mobile Browser (rất quan trọng cho Safari/Chrome Android)
+       localVideo.play().catch(e => console.error("Auto-play bị chặn, vui lòng tương tác màn hình:", e));
     } else {
        remoteVideo.srcObject = currentRemoteStream;
+       remoteVideo.play().catch(e => console.error("Auto-play bị chặn:", e));
     }
     remotePlaceholder.style.display = 'none';
     remoteLabel.style.display = 'flex';
@@ -446,13 +449,12 @@ socket.on('answer', async (data) => {
 // Nhận ICE candidate
 socket.on('ice-candidate', async (data) => {
   try {
-    if (peerConnection) {
-      if (peerConnection.remoteDescription) {
-        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-      } else {
-        // Gói Network tới sớm hơn cả Video Request -> Xếp hàng đợi
-        iceCandidateQueue.push(new RTCIceCandidate(data.candidate));
-      }
+    // Kể cả peerConnection chưa tạo (bị Null), vẫn phải đưa vào hàng đợi
+    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+      await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    } else {
+      // Gói Network tới sớm hơn cả Video Request -> Xếp hàng đợi
+      iceCandidateQueue.push(new RTCIceCandidate(data.candidate));
     }
   } catch (err) {
     console.error('Lỗi ICE candidate:', err);
