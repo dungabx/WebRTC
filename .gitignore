@@ -3,6 +3,10 @@ database.sqlite
 public/uploads/*.JPG
 public/uploads/*.jpg
 public/uploads/*.png
+chamdiem.txt
+danhgia.txt
+AIdanhgia.txt
+chinhsua.txt
 demo.md
 docs/
 pubspec.yaml
