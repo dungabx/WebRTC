@@ -12,6 +12,8 @@ const iceConfig = {
     // 1. Google STUN (dùng cho Wifi, mạng gia đình)
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
     // 2. TURN Server miễn phí bằng dự án OpenRelay (Bắt buộc dùng khi vào mạng 4G/LTE)
     {
       urls: 'turn:openrelay.metered.ca:80',
@@ -49,6 +51,7 @@ let currentLocalStream = null;  // Luồng của bản thân (hoặc mix nền �
 let compositeInterval = null;
 let screenStream = null;
 let isSwapped = false;        // Trạng thái hoán đổi màn hình
+let iceCandidateQueue = [];   // Lưu trữ ICE tới khi cấu hình xong Session
 
 // === VAD & Timer Variables ===
 let audioContext = null;
@@ -416,6 +419,11 @@ socket.on('offer', async (data) => {
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
     socket.emit('answer', { answer, to: data.from });
+    
+    // Nạp lại các gói ICE Candidate bị lag/tới sớm
+    while (iceCandidateQueue.length) {
+       await peerConnection.addIceCandidate(iceCandidateQueue.shift());
+    }
   } catch (err) {
     console.error('Lỗi xử lý offer:', err);
   }
@@ -425,6 +433,11 @@ socket.on('offer', async (data) => {
 socket.on('answer', async (data) => {
   try {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+    
+    // Nạp lại các gói ICE Candidate bị lag/tới sớm
+    while (iceCandidateQueue.length) {
+       await peerConnection.addIceCandidate(iceCandidateQueue.shift());
+    }
   } catch (err) {
     console.error('Lỗi xử lý answer:', err);
   }
@@ -434,7 +447,12 @@ socket.on('answer', async (data) => {
 socket.on('ice-candidate', async (data) => {
   try {
     if (peerConnection) {
-      await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+      if (peerConnection.remoteDescription) {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+      } else {
+        // Gói Network tới sớm hơn cả Video Request -> Xếp hàng đợi
+        iceCandidateQueue.push(new RTCIceCandidate(data.candidate));
+      }
     }
   } catch (err) {
     console.error('Lỗi ICE candidate:', err);
