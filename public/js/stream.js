@@ -9,13 +9,24 @@ const myProfile = { nickname: usrNickname, avatar: usrAvatar };
 // === Cấu hình STUN/TURN servers ===
 const iceConfig = {
   iceServers: [
-    // 1. STUN miễn phí ưu tiên trước (Google STUN)
+    // 1. Google STUN (dùng cho Wifi, mạng gia đình)
     { urls: 'stun:stun.l.google.com:19302' },
-    // 2. TURN Server làm phương án Fallback khi mạng bị block (Symmetric NAT)
+    { urls: 'stun:stun1.l.google.com:19302' },
+    // 2. TURN Server miễn phí bằng dự án OpenRelay (Bắt buộc dùng khi vào mạng 4G/LTE)
     {
-      urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-      username: 'TURN_USERNAME_DEMO',
-      credential: 'TURN_PASSWORD_DEMO'
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
     }
   ]
 };
