@@ -20,10 +20,26 @@ const iceConfig = {
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun.relay.metered.ca:80' },
     { urls: 'stun:stun.cloudflare.com:3478' },
-    { urls: 'turn:freelisten.online:3478', username: 'freeuser', credential: 'freeuser' },
-    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+    {
+      urls: 'turn:global.relay.metered.ca:80',
+      username: '76f92abcfc9edd78e00f9379',
+      credential: 'fLDc1aRRgRYw/fVu'
+    },
+    {
+      urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+      username: '76f92abcfc9edd78e00f9379',
+      credential: 'fLDc1aRRgRYw/fVu'
+    },
+    {
+      urls: 'turn:global.relay.metered.ca:443',
+      username: '76f92abcfc9edd78e00f9379',
+      credential: 'fLDc1aRRgRYw/fVu'
+    },
+    {
+      urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+      username: '76f92abcfc9edd78e00f9379',
+      credential: 'fLDc1aRRgRYw/fVu'
+    }
   ]
 };
 
