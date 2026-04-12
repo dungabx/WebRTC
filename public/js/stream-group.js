@@ -181,6 +181,22 @@ function createPeerConnection(userId, profile) {
   pc.onicecandidate = (e) => {
      if (e.candidate) socket.emit('ice-candidate', { candidate: e.candidate, to: userId });
   };
+
+  // ICE Restart Auto-Recovery (Handover 4G ↔ WiFi)
+  pc.oniceconnectionstatechange = async () => {
+      const state = pc.iceConnectionState;
+      if (state === 'failed' || state === 'disconnected') {
+          console.warn(`[Network] ${profile.nickname} bị đứt mạng. Đang khôi phục (ICE Restart)...`);
+          try {
+              pc.restartIce();
+              const offer = await pc.createOffer();
+              await pc.setLocalDescription(offer);
+              socket.emit('offer', { offer, to: userId, profile: myProfile });
+          } catch(err) {
+              console.error('Lỗi khi ICE Restart:', err);
+          }
+      }
+  };
 }
 
 function createDataChannel(userId) {
