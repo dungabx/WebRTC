@@ -42,11 +42,29 @@
 
       <!-- Tạo phòng -->
       <div class="card-section">
-        <h2 class="section-title">Tạo phòng mới</h2>
-        <p class="section-desc">Bắt đầu cuộc gọi và chia sẻ mã phòng cho đối phương</p>
-        <a href="/create" class="btn btn-primary btn-full" id="create-room-btn">
-          <i class="fas fa-plus"></i> Tạo Phòng
-        </a>
+        <h2 class="section-title">Tạo phòng nhanh</h2>
+        <p class="section-desc">Bắt đầu gọi riêng tư hoặc tạo phòng hội nghị lưới</p>
+        <div style="display: flex; gap: 10px;">
+          <a href="/create" class="btn btn-primary btn-full" style="flex: 1;" id="create-room-btn">
+            <i class="fas fa-user-friends"></i> Gọi 1:1
+          </a>
+          <button class="btn btn-secondary btn-full" style="flex: 1;" onclick="document.getElementById('groupModal').style.display='flex'">
+            <i class="fas fa-users"></i> Hội Nghị
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Chọn Nhóm -->
+      <div id="groupModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; justify-content:center; align-items:center;">
+        <div style="background:var(--surface); padding:20px; border-radius:15px; text-align:center; max-width:300px; border:1px solid rgba(255,255,255,0.1);">
+          <h3><i class="fas fa-users"></i> Cấu hình Hội Nghị</h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin:10px 0;">Nhập số lượng thành viên tối đa (3 - 9 người)</p>
+          <input type="number" id="groupLimit" min="3" max="9" value="5" class="input-group" style="width:100%; margin-bottom:15px; text-align:center; font-size:1.2rem;">
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('groupModal').style.display='none'">Hủy</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="createGroup()">Tạo</button>
+          </div>
+        </div>
       </div>
 
       <div class="divider"><span>hoặc</span></div>
@@ -88,6 +106,12 @@
       const roomId = document.getElementById('room-input').value.trim();
       if (roomId) window.location.href = '/room/' + roomId;
     });
+
+    // Tạo phòng nhóm
+    function createGroup() {
+      const limit = document.getElementById('groupLimit').value;
+      window.location.href = `/create?type=group&limit=${limit}`;
+    }
   </script>
 </body>
 </html>

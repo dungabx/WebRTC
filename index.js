@@ -53,6 +53,7 @@ function requireLogin(req, res, next) {
 
 // === Lưu trữ thông tin các phòng ===
 const rooms = new Map();
+const roomSettings = new Map(); // Lưu loại phòng: type và limit
 
 // === Routes Authentication ===
 
@@ -163,6 +164,13 @@ app.post('/profile', requireLogin, upload.single('avatar'), (req, res) => {
 // Tạo phòng mới 
 app.get('/create', requireLogin, (req, res) => {
   const roomId = uuidv4().substring(0, 8);
+  const type = req.query.type || '1v1';
+  let limit = parseInt(req.query.limit) || 2;
+  
+  if (limit > 9) limit = 9;
+  if (limit < 2) limit = 2;
+
+  roomSettings.set(roomId, { type, limit });
   res.redirect(`/room/${roomId}`);
 });
 
@@ -171,13 +179,20 @@ app.get('/room/:room', requireLogin, (req, res) => {
   const roomId = req.params.room;
   const room = rooms.get(roomId);
   
-  if (room && room.size >= 2) {
+  // Lấy cấu hình phòng, nếu không có mặc định là 1:1, max 2
+  const settings = roomSettings.get(roomId) || { type: '1v1', limit: 2 };
+
+  if (room && room.size >= settings.limit) {
     return res.redirect('/?error=full');
   }
   
   // Nạp lại thông tin mới nhất từ CSDL 
   db.get('SELECT * FROM users WHERE id = ?', [req.session.userId], (err, user) => {
-    res.render('room', { roomId, user });
+    if (settings.type === 'group') {
+       res.render('room-group', { roomId, user, limit: settings.limit });
+    } else {
+       res.render('room', { roomId, user });
+    }
   });
 });
 
@@ -203,7 +218,8 @@ io.on('connection', (socket) => {
        }
     }
 
-    if (room.size >= 2) {
+    const settings = roomSettings.get(roomId) || { type: '1v1', limit: 2 };
+    if (room.size >= settings.limit) {
       socket.emit('room-full');
       return;
     }

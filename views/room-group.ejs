@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hội Nghị <%= roomId %> - WebRTC Video Call</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <input type="hidden" id="room-id" value="<%= roomId %>">
+  <input type="hidden" id="usr-id" value="<%= user.id %>">
+  <input type="hidden" id="usr-nickname" value="<%= user.nickname %>">
+  <input type="hidden" id="usr-avatar" value="<%= user.avatar %>">
+  <input type="hidden" id="room-limit" value="<%= limit %>">
+
+  <div class="room-container">
+    <!-- Thanh trên -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <a href="/" class="back-btn" title="Về trang chủ"><i class="fas fa-arrow-left"></i></a>
+        <div class="room-info">
+          <span class="room-label">Hội Nghị Nhóm (Tối đa <%= limit %> người):</span>
+          <span class="room-code" id="room-code"><%= roomId %></span>
+          <button class="copy-btn" id="copy-btn" title="Sao chép mã phòng"><i class="fas fa-copy"></i></button>
+        </div>
+      </div>
+      <div class="top-bar-right" style="display: flex; gap: 15px; align-items: center;">
+        <div class="connection-status" id="connection-status">
+          <span class="status-dot"></span>
+          <span class="status-text">Đang thiết lập thẻ Grid...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Khu vực chính -->
+    <div class="main-content" id="main-content">
+      <div class="video-area">
+        
+        <!-- Khung Lưới tự động co giãn -->
+        <div class="group-grid-container" id="video-grid" data-users="1">
+           <!-- Camera Local của bạn chạy luôn trong lưới -->
+           <div class="grid-video-item" id="grid-item-local">
+             <video id="local-video" autoplay playsinline muted style="transform: scaleX(-1);"></video>
+             <div class="grid-video-label">
+                <img src="<%= user.avatar %>">
+                <span><%= user.nickname %> (Bạn)</span>
+             </div>
+           </div>
+        </div>
+        
+      </div>
+
+      <!-- Bảng chat -->
+      <div class="chat-panel" id="chat-panel">
+        <div class="chat-header">
+          <h3><i class="fas fa-comment-dots"></i> Trò chuyện nhóm</h3>
+          <button class="chat-close-btn" id="chat-close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-empty">
+            <i class="fas fa-comments"></i>
+            <p>Chưa có tin nhắn</p>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="file" id="chat-file-input" style="display:none;" accept="*/*">
+          <button class="chat-attach-btn" id="chat-attach-btn" title="Gửi file/ảnh"><i class="fas fa-paperclip"></i></button>
+          <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." autocomplete="off">
+          <button class="chat-send-btn" id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thanh điều khiển -->
+    <div class="controls-bar">
+      <div class="controls">
+        <button class="control-btn" id="btn-mic" title="Tắt/Bật mic">
+          <i class="fas fa-microphone"></i>
+        </button>
+        <button class="control-btn" id="btn-camera" title="Tắt/Bật camera">
+          <i class="fas fa-video"></i>
+        </button>
+        <!-- Tắt tạm chia sẻ màn hình trên bản Nhóm để tránh ngốn băng thông -->
+        <button class="control-btn" id="btn-emoji" title="Thả tim">
+          <i class="fas fa-heart text-primary"></i>
+        </button>
+        <button class="control-btn" id="btn-chat" title="Mở chat">
+          <i class="fas fa-comment-dots"></i>
+          <span class="chat-badge" id="chat-badge" style="display:none;">0</span>
+        </button>
+        <button class="control-btn control-btn-danger" id="btn-leave" title="Rời phòng">
+          <i class="fas fa-phone-slash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông báo toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Load Module WebRTC Lưới Mạng Mesh -->
+  <script src="/js/stream-group.js"></script>
+</body>
+</html>
