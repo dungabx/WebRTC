@@ -284,3 +284,49 @@ input{font-family:inherit;}
   0%, 100% { box-shadow: 0 0 20px 6px rgba(34, 197, 94, 0.5); }
   50% { box-shadow: 0 0 30px 10px rgba(34, 197, 94, 0.7); }
 }
+
+/* === Chat File & Images === */
+.chat-attach-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.chat-attach-btn:hover {
+  color: var(--primary);
+}
+
+.chat-image {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 5px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.chat-image:hover {
+  transform: scale(1.02);
+}
+
+.chat-file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  transition: background 0.2s;
+}
+.chat-file-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.chat-file-link i {
+  font-size: 1.2rem;
+  color: var(--primary);
+}

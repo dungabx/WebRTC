@@ -319,6 +319,16 @@ function setupDataChannel(channel) {
           chatBadge.textContent = unreadMessages;
           chatBadge.style.display = 'flex';
         }
+      } else if (parsed.type === 'file') {
+        const fileHtml = parsed.mimetype.startsWith('image/') 
+            ? `<img src="${parsed.url}" class="chat-image" alt="${parsed.filename}" onclick="window.open(this.src)">`
+            : `<a href="${parsed.url}" download="${parsed.filename}" class="chat-file-link" target="_blank"><i class="fas fa-file"></i> ${parsed.filename}</a>`;
+        addMessage(fileHtml, 'remote');
+        if (!isChatOpen) {
+          unreadMessages++;
+          chatBadge.textContent = unreadMessages;
+          chatBadge.style.display = 'flex';
+        }
       } else if (parsed.type === 'emoji') {
         createFloatingEmoji(parsed.emoji);
       } else if (parsed.type === 'vad') {
@@ -681,6 +691,66 @@ document.getElementById('chat-send-btn').addEventListener('click', sendMessage);
 chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
+
+// === Đính kèm File/Ảnh ===
+const fileInput = document.getElementById('chat-file-input');
+const attachBtn = document.getElementById('chat-attach-btn');
+
+if (attachBtn) {
+  attachBtn.addEventListener('click', () => fileInput.click());
+}
+
+if (fileInput) {
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      fileInput.value = '';
+      return showToast('File quá lớn (Tối đa 10MB)', 'error');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const btnIcon = attachBtn.querySelector('i');
+      btnIcon.className = 'fas fa-spinner fa-spin'; // Xoay icon loading
+
+      const res = await fetch('/api/chat-upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      btnIcon.className = 'fas fa-paperclip'; // Trả lại icon cũ
+      fileInput.value = '';
+      
+      if (data.error) throw new Error(data.error);
+
+      // Render nội dung lên máy mình
+      const fileHtml = data.mimetype.startsWith('image/') 
+          ? `<img src="${data.url}" class="chat-image" alt="${data.filename}" onclick="window.open(this.src)">`
+          : `<a href="${data.url}" download="${data.filename}" class="chat-file-link" target="_blank"><i class="fas fa-file"></i> ${data.filename}</a>`;
+      addMessage(fileHtml, 'local');
+
+      // Gửi sang ngườid dùng bên kia qua P2P
+      if (dataChannel && dataChannel.readyState === 'open') {
+          dataChannel.send(JSON.stringify({ 
+              type: 'file', 
+              url: data.url, 
+              filename: data.filename, 
+              mimetype: data.mimetype 
+          }));
+      } else {
+          showToast('Chưa gửi cho đối phương vì chưa kết nối mạng', 'warning');
+      }
+      
+    } catch (err) {
+      showToast('Lỗi Upload file', 'error');
+      attachBtn.querySelector('i').className = 'fas fa-paperclip';
+    }
+  });
+}
 
 const shareLinkBtn = document.getElementById('share-link-btn');
 if (shareLinkBtn) shareLinkBtn.addEventListener('click', copyRoomCode);

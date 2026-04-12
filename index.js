@@ -129,6 +129,18 @@ app.post('/api/history', requireLogin, (req, res) => {
   });
 });
 
+// API Upload File trong nhóm Chat
+app.post('/api/chat-upload', requireLogin, upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Không tìm thấy file' });
+  
+  const fileUrl = '/uploads/' + req.file.filename;
+  res.json({ 
+    url: fileUrl, 
+    filename: req.file.originalname, 
+    mimetype: req.file.mimetype 
+  });
+});
+
 app.post('/profile', requireLogin, upload.single('avatar'), (req, res) => {
   const nickname = req.body.nickname;
   let avatar = req.session.user.avatar;
