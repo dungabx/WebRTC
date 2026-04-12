@@ -3,34 +3,29 @@
 
 // Lấy thông tin tài khoản đang thao tác
 const usrId = document.getElementById('usr-id') ? document.getElementById('usr-id').value : 'guest';
+let webClientId = sessionStorage.getItem('webrtc_client_id');
+if (!webClientId) {
+    webClientId = Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem('webrtc_client_id', webClientId);
+}
+
 const usrNickname = document.getElementById('usr-nickname') ? document.getElementById('usr-nickname').value : 'Người dùng hệ thống';
 const usrAvatar = document.getElementById('usr-avatar') ? document.getElementById('usr-avatar').value : '';
-const myProfile = { id: usrId, nickname: usrNickname, avatar: usrAvatar };
+const myProfile = { id: webClientId, accountId: usrId, nickname: usrNickname, avatar: usrAvatar };
 
 // === Cấu hình STUN/TURN servers ===
 const iceConfig = {
   iceServers: [
-    // 1. Google STUN (dùng cho Wifi, mạng gia đình)
+    // 1. STUN Servers dự phòng băng thông rộng
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    // 2. TURN Server miễn phí bằng dự án OpenRelay (Bắt buộc dùng khi vào mạng 4G/LTE)
-    {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    }
+    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    // 2. TURN Server miễn phí chống FireWall & NAT Khắc nghiệt
+    { urls: 'turn:freelisten.online:3478', username: 'freeuser', credential: 'freeuser' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
   ]
 };
 

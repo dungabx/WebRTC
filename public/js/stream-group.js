@@ -3,16 +3,27 @@
 
 const roomId = document.getElementById('room-id').value;
 const usrId = document.getElementById('usr-id').value;
+
+let webClientId = sessionStorage.getItem('webrtc_client_id');
+if (!webClientId) {
+    webClientId = Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem('webrtc_client_id', webClientId);
+}
+
 const usrNickname = document.getElementById('usr-nickname').value;
 const usrAvatar = document.getElementById('usr-avatar').value;
-const myProfile = { id: usrId, nickname: usrNickname, avatar: usrAvatar };
+const myProfile = { id: webClientId, accountId: usrId, nickname: usrNickname, avatar: usrAvatar };
 
 const iceConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'turn:freelisten.online:3478', username: 'freeuser', credential: 'freeuser' },
     { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
   ]
 };
 
