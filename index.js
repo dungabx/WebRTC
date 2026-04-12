@@ -211,7 +211,10 @@ io.on('connection', (socket) => {
     // Nghĩa là nếu máy đứt mạng chưa kịp báo disconnect, giờ nó join bằng ID Cũ
     for (let currentSocketId of room) {
        let oldSocket = io.sockets.sockets.get(currentSocketId);
-       if (oldSocket && oldSocket.userProfile && oldSocket.userProfile.id === userProfile.id) {
+       // Sửa lỗi: Cần đảm bảo có id (tránh việc Cache trình duyệt cũ gửi lên id = undefined, dẫn đến undefined === undefined gây kick vô hạn)
+       if (oldSocket && oldSocket.userProfile && oldSocket.userProfile.id 
+           && userProfile && userProfile.id 
+           && oldSocket.userProfile.id === userProfile.id) {
            console.log(`[!] Phát hiện Ghost socket của ${userProfile.nickname}. Đã kick!`);
            room.delete(currentSocketId);
            oldSocket.disconnect();
